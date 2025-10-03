@@ -1,0 +1,53 @@
+# Netflix Content Analysis and Visualization
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load dataset
+df = pd.read_csv("Netflix Dataset.csv")
+
+# ========== Data Cleaning ==========
+# Convert Release_Date to datetime and extract year
+df['Release_Date'] = pd.to_datetime(df['Release_Date'], errors='coerce')
+df['Year'] = df['Release_Date'].dt.year
+
+# Extract duration as numeric and type (Minutes vs Seasons)
+df['Duration_num'] = df['Duration'].str.extract('(\d+)').astype(float)
+df['Duration_type'] = df['Duration'].apply(lambda x: 'Season' if 'Season' in str(x) else 'Minute')
+
+# Extract main genre (first listed)
+df['Main_Genre'] = df['Type'].str.split(',').str[0]
+
+# Set style
+sns.set(style="whitegrid")
+
+# ========== 1. Movies vs TV Shows Distribution ==========
+plt.figure(figsize=(6,4))
+sns.countplot(data=df, x='Category', palette='Set2')
+plt.title("Movies vs TV Shows Distribution")
+plt.show()
+
+# ========== 2. Content Addition Trend ==========
+plt.figure(figsize=(12,6))
+sns.countplot(data=df, x='Year', hue='Category', palette='Set1')
+plt.xticks(rotation=90)
+plt.title("Content Addition Trend Over Years (Movies vs TV Shows)")
+plt.show()
+
+# ========== 3. Top Genres ==========
+top_genres = df['Main_Genre'].value_counts().head(10)
+plt.figure(figsize=(10,6))
+sns.barplot(x=top_genres.values, y=top_genres.index, palette='coolwarm')
+plt.title("Top 10 Genres on Netflix")
+plt.xlabel("Count")
+plt.ylabel("Genre")
+plt.show()
+
+# ========== 4. Top Countries ==========
+top_countries = df['Country'].value_counts().head(10)
+plt.figure(figsize=(10,6))
+sns.barplot(x=top_countries.values, y=top_countries.index, palette='viridis')
+plt.title("Top 10 Countries Contributing to Netflix Content")
+plt.xlabel("Count")
+plt.ylabel("Country")
+plt.show()
